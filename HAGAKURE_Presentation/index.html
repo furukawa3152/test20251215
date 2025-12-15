@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAGAKURE PROGRAMMING塾 2025.12.20</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f0;
+            /* Paper / Washi - Off White */
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            /* Sumi - Ink Black */
+            --text-sub: #555555;
+            --accent-red: #c02f2f;
+            /* Beni - Crimson */
+            --accent-gold: #b3921f;
+            /* Yamabuki - Darker Gold for visibility on white */
+            --accent-green: #3d5e20;
+            /* Matcha - Darker Green */
+            --font-main: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .slide-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 800px;
+            /* Max height constraint */
+            position: relative;
+            background: var(--card-bg);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 60px 80px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: scale(0.98);
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+            z-index: 10;
+        }
+
+        /* Header & Footer */
+        .slide-header {
+            position: absolute;
+            top: 30px;
+            left: 80px;
+            right: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-red);
+            padding-bottom: 10px;
+            z-index: 20;
+        }
+
+        .event-name {
+            font-size: 0.9rem;
+            color: var(--accent-gold);
+            letter-spacing: 0.05em;
+            font-weight: bold;
+        }
+
+        .slide-number {
+            font-family: monospace;
+            color: var(--text-sub);
+        }
+
+        /* Content Layouts */
+        .content-wrapper {
+            margin-top: 60px;
+            height: calc(100% - 60px);
+            /* Adjust for header */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* Back to center for balance */
+            padding: 0 40px;
+            /* Side padding */
+        }
+
+        .split-layout {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            /* Much wider for text */
+            gap: 60px;
+            align-items: center;
+            /* Vertically align items */
+            height: calc(100% - 60px);
+            padding: 0 20px;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #1a1a1a 0%, #555 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            /* Slightly smaller */
+            margin-bottom: 30px;
+            color: var(--accent-red);
+            border-left: 6px solid var(--accent-gold);
+            padding-left: 20px;
+        }
+
+        h3 {
+            font-size: 1.6rem;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            margin-top: 0;
+            /* Removing top margin as alignment handles it */
+        }
+
+        p {
+            font-size: 1.5rem;
+            /* Slightly larger */
+            line-height: 1.9;
+            margin-bottom: 25px;
+            color: var(--text-main);
+            max-width: 90%;
+            /* Prevent lines from being too long */
+        }
+
+        li {
+            font-size: 1.4rem;
+            margin-bottom: 18px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        /* Images */
+        .hero-img {
+            max-width: 100%;
+            height: auto;
+            max-height: 220px;
+            /* Restored some presence */
+            object-fit: contain;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+            margin-top: 0;
+            /* Centered by grid now */
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 80px;
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .btn {
+            background: transparent;
+            border: 2px solid var(--text-sub);
+            color: var(--text-sub);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .btn:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 6px;
+            background: var(--accent-red);
+            width: 0%;
+            transition: width 0.3s;
+            z-index: 100;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+
+        .pulse-anim {
+            animation: pulse 3s infinite;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slide-container">
+        <div class="progress-bar" id="progressBar"></div>
+
+        <!-- Header Template for JS to inject/manage if needed, but using per-slide structure for simplicity with CSS -->
+
+        <!-- SLIDE 1: Title -->
+        <div class="slide active" id="slide-1">
+            <div class="slide-header">
+                <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+                <span class="slide-number">01 / 11</span>
+            </div>
+            <div class="split-layout">
+                <div>
+                    <h3 style="color: var(--accent-red);">AGENTIC CODING</h3>
+                    <h1>Antigravityではじめる<br>新時代の開発体験</h1>
+                    <p>かつてない「ペアプログラミング」体験へ。<br>AIはツールから、<span class="highlight">パートナー</span>になる。</p>
+                </div>
+                <div style="text-align: right;">
+                    <img src="images/voice-samurai.png" alt="Samurai" class="hero-img pulse-anim">
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Agentic Coding? -->
+        <div class="slide" id="slide-2">
+            <div class="slide-header">
+                <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+                <span class="slide-number">02 / 11</span>
+            </div>
+            <div class="split-layout">
+                <div>
+                    <h2>エージェントコーディングとは？</h2>
+                    <p>これまでのAIコーディング:</p>
+                    <ul>
+                        <li>人間が主導権を持つ</li>
+                        <li>AIは「補完（Autocomplete）」するだけ</li>
+                        <li>指示待ちの道具</li>
+                    </ul>
+                    <p style="margin-top: 30px;">これからのAIコーディング:</p>
+                    <ul>
+                        <li class="highlight" style="font-size: 1.5rem;">AIが「自律的（Agentic）」に動く</li>
+                        <li>タスクのゴールを理解し、計画を立てる</li>
+                        <li>影のように働く、有能なパートナー</li>
+                    </ul>
+                </div>
+                <div style="text-align: center;">
+                    <img src="images/voice-ninja1.png" alt="Ninja" class="hero-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Antigravity Intro -->
+        <div class="slide" id="slide-3">
+            <div class="slide-header">
+                <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+                <span class="slide-number">03 / 11</span>
+            </div>
+            <div class="content-wrapper">
+                <h2>Antigravity (Google DeepMind)</h2>
+                <p>Google DeepMindが開発する、最先端のエージェント型コーディングアシスタント。</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 30px;">
+                    <div class="warning-box"
+                        style="border-color: var(--accent-green); background: rgba(79, 122, 40, 0.1);">
+                        <h3 style="margin-top:0;">What it can do</h3>
+                        <ul>
+                            <li><span class="highlight">File I/O</span>: ワークスペース内の全ファイルを読み書き</li>
+                            <li><span class="highlight">Terminal</span>: コマンドの実行、サーバー起動、テスト</li>
+                            <li><span class="highlight">Browser</span>: Web検索、ドキュメント閲覧</li>
+                            <li><span class="highlight">Self-Correction</span>: エラーを見て自分で修正</li>
+                        </ul>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <img src="images/voice-ninja2.png" alt="Ninja 2" class="hero-img" style="max-height: 400px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Workflow -->
+        <div class="slide" id="slide-4">
+            <div class="slide-header">
+                <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+                <span class="slide-number">04 / 11</span>
+            </div>
+            <div class="content-wrapper">
+                <h2>The Create Loop: 3つのモード</h2>
+                <p>Antigravityは3つのモードを行き来してタスクを遂行します。</p>
+
+                <div style="display: flex; gap: 20px; text-align: center; margin-top: 40px;">
+                    <div style="flex: 1; padding: 20px; border: 1px solid var(--accent-gold); border-radius: 8px;">
+                        <h3 style="color: var(--accent-gold);">1. PLANNING</h3>
+                        <p style="font-size: 1rem;">要件を理解し、「implementation_plan.md」を作成して設計する。</p>
+                    </div>
+                    <div
+                        style="flex: 0 0 50px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--text-sub);">
+                        →</div>
+                    <div style="flex: 1; padding: 20px; border: 1px solid var(--accent-red); border-radius: 8px;">
+                        <h3 style="color: var(--accent-red);">2. EXECUTION</h3>
+                        <p style="font-size: 1rem;">コードを書き、コマンドを実行し、実際にモノを作る。</p>
+                    </div>
+                    <div
+                        style="flex: 0 0 50px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--text-sub);">
+                        →</div>
+                    <div style="flex: 1; padding: 20px; border: 1px solid var(--accent-green); border-radius: 8px;">
+                        <h3 style="color: var(--accent-green);">3. VERIFICATION</h3>
+                        <p style="font-size: 1rem;">動作確認を行い、「walkthrough.md」で結果を報告する。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Artifacts -->
+        <div class="slide" id="slide-5">
+            <div class="slide-header">
+                <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+                <span class="slide-number">05 / 11</span>
+            </div>
+            <div class="split-layout">
+                <div>
+                    <h2>Artifacts: エージェントとの共通言語</h2>
+                    <p>エージェントは「アーティファクト（成果物）」を通して思考と進捗を共有します。</p>
+                    <div class="code-block">
+                        .gemini/antigravity/brain/
+                        ├── task.md # 進捗管理チェックリスト
+                        ├── implementation_plan.md # 設計図・変更計画
+                        └── walkthrough.md # 検証結果レポート
+                    </div>
+                    <p>これらを確認・レビューすることが、<br>人間の最も重要な役割です。</p>
+                </div>
+                <div>
+                    <img src="images/voice-samurai.png" alt="Samurai" class="hero-img" style="transform: scaleX(-1);">
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Hands-on -->
+        <div class="slide" id="slide-6">
+            <div class="slide-header">
+                <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+                <span class="slide-number">06 / 11</span>
+            </div>
+            <div class="content-wrapper">
+                <h2>Hands-on: 最初のタスクを依頼する</h2>
+                <p>さあ、実際に「ダウンロード」して依頼してみましょう。
+
+                <div style="margin: 30px 0;">
+                    <a href="https://antigravity.google/download" target="_blank" style="
+                    display: inline-block;
+                    background: var(--accent-red);
+                    color: white;
+                    text-decoration: none;
+                    padding: 15px 40px;
+                    border-radius: 30px;
+                    font-weight: bold;
+                    font-size: 1.2rem;
+                    box-shadow: 0 4px 10px rgba(192, 47, 47, 0.3);
+                    transition: transform 0.2s;
+                ">↓ Download Antigravity</a>
+                </div>
+
+                <h3>プロンプトの例:</h3>
+                <div class="code-block" style="color: #ce9178;">
+                    「Antigravityさん、
+                    現在のディレクトリに、Next.jsで
+                    〇〇な機能を持つポートフォリオサイトを作ってください。
+                    デザインは和風でお願いします。」
+                </div>
+                <ul>
+                    <li>可能な限り具体的に</li>
+                    <li>コンテキスト（既存ファイルなど）を与える</li>
+                    <li>「notify_user」で質問が来たら答える</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: Extension (NEW) -->
+        <div class="slide" id="slide-7">
+            <div class="slide-header">
+                <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+                <span class="slide-number">07 / 11</span>
+            </div>
+            <div class="split-layout">
+                <div>
+                    <h2>推奨環境: ブラウザ拡張機能</h2>
+                    <p>Antigravityの真価を発揮するために、Chrome拡張機能のインストールを強く推奨します。</p>
+
+                    <ul>
+                        <li>ブラウザ操作（Web検索、プレビュー）がスムーズに連携</li>
+                        <li>より高度なコンテキスト認識</li>
+                    </ul>
+
+                    <div style="margin-top: 40px;">
+                        <a href="https://chromewebstore.google.com/detail/antigravity-browser-exten/eeijfnjmjelapkebgockoeaadonbchdd?pli=1"
+                            target="_blank" style="
+                        display: inline-block;
+                        background: var(--text-main);
+                        color: white;
+                        text-decoration: none;
+                        padding: 15px 40px;
+                        border-radius: 8px;
+                        font-family: sans-serif;
+                         box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                    ">
+                            Chrome Web Store で追加 ↗
+                        </a>
+                    </div>
+                </div>
+                <img src="images/voice-ninja2.png" alt="Ninja" class="hero-img">
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: Japanese Setting (NEW) -->
+    <div class="slide" id="slide-8">
+        <div class="slide-header">
+            <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+            <span class="slide-number">08 / 11</span>
+        </div>
+        <div class="split-layout">
+            <div>
+                <h2>回答を日本語にしてもらう</h2>
+                <p>デフォルトでは英語で回答する場合があるため、日本語設定を推奨します。</p>
+
+                <h3 style="margin-top: 30px;">設定手順 (Global Rules):</h3>
+                <ol style="font-size: 1.4rem; line-height: 1.8; color: var(--text-main); margin-left: 20px;">
+                    <li style="margin-bottom: 20px;">Agentパネル右上の「…」をクリック</li>
+                    <li style="margin-bottom: 20px;">「Customizations」 → 「Rules」を選択</li>
+                    <li style="margin-bottom: 20px;">「+ Global」をクリックして以下を入力:</li>
+                </ol>
+
+                <div class="code-block" style="color: #ce9178; font-weight: bold;">
+                    日本語で回答してください
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <img src="images/voice-samurai.png" alt="Samurai" class="hero-img">
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: Warning (Renumbered) -->
+    <div class="slide" id="slide-9">
+        <div class="slide-header">
+            <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+            <span class="slide-number">09 / 11</span>
+        </div>
+        <div class="content-wrapper">
+            <div class="warning-box" style="border-width: 4px; background: rgba(0,0,0,0.3);">
+                <div class="warning-title">
+                    <span>⚠</span> 【重要】リスクと安全対策
+                </div>
+                <p>「AI誤処理でHDD内データ全消去」というニュースがありました。</p>
+                <p style="font-size: 1rem;"><a href="https://www.smartnews.com/ja-jp/article/4887717334648626259"
+                        target="_blank" style="color: var(--accent-gold);">参考記事: Google Antigravity just deleted the
+                        contents of my whole drive.</a></p>
+
+                <h3 style="color: var(--text-main);">教訓 (Lessons Learned):</h3>
+                <ul style="color: var(--text-sub);">
+                    <li>AIは強力な権限を持っています。</li>
+                    <li>「全てのファイルを消して」などの曖昧で破壊的な指示は絶対にNG。</li>
+                    <li><strong>コマンド実行の承認（Accept/Reject）</strong>は、必ず内容を確認してから押すこと。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: Summary (Renumbered) -->
+    <div class="slide" id="slide-10">
+        <div class="slide-header">
+            <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+            <span class="slide-number">10 / 11</span>
+        </div>
+        <div class="split-layout">
+            <div>
+                <h2>まとめ: 魔法ではなく、同僚。</h2>
+                <p>Antigravityは魔法の杖ではありません。<br>しかし、最高に優秀で疲れを知らない「同僚」です。</p>
+
+                <h3 class="highlight">HAGAKUREの精神で:</h3>
+                <ul>
+                    <li>主導権は人間が持つ（武士道）</li>
+                    <li>対話し、共に作り上げる</li>
+                    <li>リスクを管理し、使いこなす</li>
+                </ul>
+
+                <p style="margin-top: 40px; font-size: 2rem; color: var(--accent-gold);">Enjoy Agentic Coding!</p>
+            </div>
+            <div style="text-align: right;">
+                <img src="images/machi-musume.png" alt="Machi Musume" class="hero-img">
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: End (Renumbered) -->
+    <div class="slide" id="slide-11">
+        <div class="slide-header">
+            <span class="event-name">HAGAKURE PROGRAMMING塾 2025.12.20</span>
+            <span class="slide-number">11 / 11</span>
+        </div>
+        <div class="content-wrapper" style="align-items: center; text-align: center;">
+            <h1 style="font-size: 5rem; color: var(--accent-gold);">完</h1>
+            <p>ご清聴ありがとうございました。</p>
+            <p style="margin-top: 50px; font-size: 1rem; color: var(--text-sub);">Created by Antigravity</p>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button class="btn" id="prevBtn" onclick="changeSlide(-1)">←</button>
+        <button class="btn" id="nextBtn" onclick="changeSlide(1)">→</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            // Update Progress Bar
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function changeSlide(direction) {
+            const next = currentSlide + direction;
+            if (next >= 0 && next < totalSlides) {
+                currentSlide = next;
+                updateSlide();
+            }
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+            }
+        });
+
+        // Initialize
+        updateSlide();
+
+    </script>
+
+</body>
+
+</html>
